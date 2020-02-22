@@ -39,6 +39,16 @@ const routes = [
     name: 'bidding',
     component: () => import('../views/Bidding.vue'),
   },
+  {
+    path: '/inputStore',
+    name: 'inputStore',
+    component: () => import('../views/InputStore.vue'),
+  },
+  {
+    path: '/outputStore',
+    name: 'outputStore',
+    component: () => import('../views/OutputStore.vue'),
+  },
 ];
 
 const router = new VueRouter({

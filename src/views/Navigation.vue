@@ -26,7 +26,7 @@
           我的订单
         </p>
       </GridItem>
-      <GridItem>
+      <GridItem to="outputStore">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-bianpinghuatubiaosheji-3"></use>
         </svg>
@@ -58,7 +58,7 @@
           我的报单
         </p>
       </GridItem>
-      <GridItem>
+      <GridItem to="inputStore">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-bianpinghuatubiaosheji-7"></use>
         </svg>
