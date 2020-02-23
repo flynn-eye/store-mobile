@@ -49,6 +49,11 @@ const routes = [
     name: 'outputStore',
     component: () => import('../views/OutputStore.vue'),
   },
+  {
+    path: '/supplierInf',
+    name: 'supplierInf',
+    component: () => import('../views/SupplierInf.vue'),
+  },
 ];
 
 const router = new VueRouter({

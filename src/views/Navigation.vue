@@ -66,12 +66,12 @@
          入库
         </p>
       </GridItem>
-      <GridItem>
+      <GridItem to="supplierInf">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-bianpinghuatubiaosheji-8"></use>
         </svg>
         <p>
-          仓库管理
+          供应商信息
         </p>
       </GridItem>
     </Grid>
