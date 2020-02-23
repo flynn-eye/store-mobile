@@ -54,6 +54,10 @@ const routes = [
     name: 'supplierInf',
     component: () => import('../views/SupplierInf.vue'),
   },
+  {
+    path: '*',
+    redirect: '/login',
+  },
 ];
 
 const router = new VueRouter({
