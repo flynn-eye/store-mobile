@@ -65,7 +65,7 @@ export default {
     return {
       rejectReason: '猪肉太贵',
       active: 1,
-      stepItem: ['等待审核', '审核失败', '审核通过'],
+      stepItem: ['等待审核', '审核失败', '审核通过', '待出库'],
       tabIndex: 0,
       items: this.$store.state.myCustom.items,
       stepItems: [
