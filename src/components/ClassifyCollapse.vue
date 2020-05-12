@@ -13,10 +13,13 @@
                   {{i.name}}
                 </div>
                 <div slot="label">
-                  {{i.count+i.unit}}
+                  {{i.count}}{{i.unit}}
                 </div>
                 <div slot="default">
                   <Stepper
+                    :default-value="0"
+                    input-width="80"
+                    v-model="i.price"
                     @change="change"
                     step="0.01"
                     :name="k"
@@ -29,28 +32,19 @@
       </div>
       <div v-show="sortKey==='2'">
         <div v-for="(item,key) in itemsByStore.local" :key="key">
-          <CollapseItem name="按运送仓库分类">
+          <CollapseItem :name="item.localName">
             <div slot="title">
-              {{itemsByStore.time+item.localName}} 的订单
+              {{itemsByStore.time}} {{item.localName}} 的订单
             </div>
-            <div v-for="(i,k) in item.store" :key="k">
-              <CollapseItem>
+            <div v-for="(v,index) in item.food" :key="index">
+              <Cell>
                 <div slot="title">
-                  {{i.storeName}} 的订单
+                  {{v.name}}
                 </div>
-                <CellGroup>
-                  <div v-for="(v,index) in i.food" :key="index">
-                    <Cell>
-                      <div slot="title">
-                        {{v.name}}
-                      </div>
-                      <div slot="default">
-                        {{v.count+v.unit}}
-                      </div>
-                    </Cell>
-                  </div>
-                </CellGroup>
-              </CollapseItem>
+                <div slot="default">
+                  {{v.count}}{{v.unit}}
+                </div>
+              </Cell>
             </div>
           </CollapseItem>
         </div>

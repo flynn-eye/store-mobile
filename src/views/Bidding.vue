@@ -12,12 +12,13 @@
         :itemsByStore="itemsByStore"
         :itemsByFood="itemsByFood"/>
       <div v-show="sortKey==='1'"  class="EditButton">
-        <Button @click="submit" type="danger" hairline round >报单修改</Button>
+        <Button @click="submit" type="danger" hairline round >竞标提交</Button>
       </div>
     </div>
 </template>
 
 <script>
+/* eslint-disable */
 import {
   DropdownMenu,
   DropdownItem,
@@ -36,158 +37,112 @@ export default {
     ClassifyCollapse,
     Button,
   },
+  mounted(){
+    this.$store.dispatch("bidding/getSupplierFoodClassId",{userId:localStorage.getItem('userId')})
+      .then(res=>{
+        this.supplierInfo = res;
+        this.$store.dispatch("bidding/getTodayBidding",{classId:res.supplierClass})
+          .then(res=>{
+            this.itemsByFood.time = res.time
+            this.itemsByStore.time = res.time
+          })
+          .catch(res=>{
+            this.orderId = res.orderId
+            this.itemsByFood.time = res.time
+            this.itemsByStore.time = res.time
+            let detailTemp = res.detail
+            detailTemp=detailTemp.replace('{','')
+            detailTemp=detailTemp.replace('}','')
+            let detailArr = detailTemp.split(',')
+            for (let i of detailArr) {
+              let arrI = i.split(':')
+              this.$store.dispatch("bidding/getItemByItemId",{itemId:parseInt(arrI[0])})
+                .then(res=>{
+                  this.itemsByFood.foods.push({
+                    id:res.itemId,
+                    unit: res.unitId,
+                    name:res.itemName,
+                    count:parseFloat(arrI[1]),
+                    price:res.lastPrice
+                  })
+                })
+            }
+            //--------------------------------------------------
+            let sendInf = res.sendInf
+            let xarr = sendInf.split(':{')
+            let localArr = [];
+            let itemArr = [];
+            localArr.push(xarr[0].replace('{',''))
+            for(let i=1;i<xarr.length-1;i++){
+              let arr =  xarr[i].split("},")
+              itemArr.push(arr[0])
+              localArr.push(arr[1])
+            }
+            itemArr.push(xarr[xarr.length-1].replace('}}',''))
+            for(let i = 0;i<localArr.length;i++){
+              this.$store.dispatch("bidding/getWareHouseById",{wareHouseId:parseInt(localArr[i])})
+                .then(res=>{
+                  let arrItem = itemArr[i].split(',');
+                  let food = [];
+                  for(let z = 0;z<arrItem.length;z++){
+                    let zarr = arrItem[z].split(':')
+                    this.$store.dispatch("bidding/getItemByItemId",{itemId:parseInt(zarr[0])})
+                      .then(res=>{
+                        food.push(
+                          {
+                            id:res.itemId,
+                            unit: res.unitId,
+                            name:res.itemName,
+                            count:parseFloat(zarr[1]),
+                          }
+                        )
+                      })
+                  }
+                  this.itemsByStore.local.push(
+                    {
+                      name:res[0].name,
+                      localName:res[0].name,
+                      food:food
+                    }
+                  )
+                })
+            }
+          })
+      })
+  },
   methods: {
     change(value, { name }) {
-      this.itemsByFood.foods[name].price = value;
-      console.log(this.itemsByFood.foods[name].price);
+      //this.itemsByFood.foods[name].price = value;
+      console.log(this.itemsByFood.foods[name].price)
     },
     submit() {
-      console.log(this.itemsByFood);
+      this.$store.dispatch("bidding/addBidding",{
+        ...this.itemsByFood,
+        supplierId:this.supplierInfo.supplierId,
+        orderId:this.orderId
+      })
+        .then(res=>{
+          console.log(res)
+        })
     },
   },
   data() {
     return {
+      orderId:null,
+      supplierInfo:null,
       sortKeys: [
         { text: '按食品类型分类', value: '1' },
         { text: '按运送仓库分类', value: '2' },
       ],
       sortKey: '1',
       itemsByFood: {
-        time: '2011-2-1',
+        time: '',
         foods: [
-          {
-            name: '猪肉',
-            id: '1',
-            unit: '斤',
-            count: 11,
-            price: 0,
-          },
-          {
-            name: '鱼肉',
-            id: '2',
-            unit: '斤',
-            count: 22,
-            price: 0,
-          },
-          {
-            name: '牛肉',
-            id: '3',
-            unit: '斤',
-            count: 44,
-            price: 0,
-          },
-          {
-            name: '鸡肉',
-            id: '4',
-            unit: '斤',
-            count: 3,
-            price: 0,
-          },
-          {
-            name: '白菜',
-            id: '5',
-            unit: '棵',
-            count: 2,
-            price: 0,
-          },
-          {
-            name: '酱油',
-            id: '6',
-            unit: '桶',
-            count: 1,
-            price: 0,
-          },
-          {
-            name: '盐',
-            id: '7',
-            unit: '袋',
-            count: 1,
-            price: 0,
-          },
         ],
       },
       itemsByStore: {
-        time: '2011-2-1',
-        local: [
-          {
-            localName: '区域A',
-            store: [
-              {
-                storeName: '1号仓库',
-                food: [
-                  {
-                    name: '盐',
-                    id: '7',
-                    unit: '袋',
-                    count: 1,
-                  },
-                  {
-                    name: '酱油',
-                    id: '6',
-                    unit: '桶',
-                    count: 1,
-                  },
-                ],
-              },
-              {
-                storeName: '2号仓库',
-                food: [
-                  {
-                    name: '鸡肉',
-                    id: '4',
-                    unit: '斤',
-                    count: 3,
-                  },
-                  {
-                    name: '白菜',
-                    id: '5',
-                    unit: '棵',
-                    count: 2,
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            localName: '区域B',
-            store: [
-              {
-                storeName: '1号仓库',
-                food: [
-                  {
-                    name: '盐',
-                    id: '7',
-                    unit: '袋',
-                    count: 1,
-                  },
-                  {
-                    name: '酱油',
-                    id: '6',
-                    unit: '桶',
-                    count: 1,
-                  },
-                ],
-              },
-              {
-                storeName: '2号仓库',
-                food: [
-                  {
-                    name: '鸡肉',
-                    id: '4',
-                    unit: '斤',
-                    count: 3,
-                  },
-                  {
-                    name: '白菜',
-                    id: '5',
-                    unit: '棵',
-                    count: 2,
-                  },
-                ],
-              },
-            ],
-          },
-        ],
+        time: '',
+        local: [],
       },
     };
   },

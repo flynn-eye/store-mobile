@@ -2,14 +2,14 @@
   <div>
     <NavigationLayout location-title="功能" :show-left="true"/>
     <Grid :column-num="3" :clickable="true" :square="true">
-      <GridItem to="/changePassword">
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-bianpinghuatubiaosheji-"></use>
-        </svg>
-        <p>
-          修改密码
-        </p>
-      </GridItem>
+      <!--<GridItem to="/changePassword">-->
+        <!--<svg class="icon" aria-hidden="true">-->
+          <!--<use xlink:href="#icon-bianpinghuatubiaosheji-"></use>-->
+        <!--</svg>-->
+        <!--<p>-->
+          <!--修改密码-->
+        <!--</p>-->
+      <!--</GridItem>-->
       <GridItem to="windowCustoms">
         <svg class="icon">
           <use xlink:href="#icon-bianpinghuatubiaosheji-1"></use>

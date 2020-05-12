@@ -43,9 +43,9 @@
             placeholder='请输入短信验证码'
             :rules='rules.codeRule'
           >
-            <Button @click='requireCode' native-type='button'
+            <Button :disabled="isDis" @click='requireCode' native-type='button'
                     slot='button' size='small' type='primary'>
-              发送验证码
+              {{requireCodeMsg}}
             </Button>
           </Field>
           <div style='margin: 16px;'>
@@ -60,11 +60,12 @@
 </template>
 
 <script>
+/* eslint-disable */
 import {
   Tab, Tabs, Field, Form, Button,
 } from 'vant';
 import NavigationLayout from '../components/layout/NavigationLayout.vue';
-
+import { post ,get} from '../util/http';
 export default {
   name: 'Login',
   components: {
@@ -77,6 +78,8 @@ export default {
   },
   data() {
     return {
+      requireCodeMsg:'发送验证码',
+      isDis:false,
       rules: {
         userNameRule: [
           { required: true, message: '需要用户名' },
@@ -104,17 +107,78 @@ export default {
     },
     onSubmit() {
       if (this.tabIndex === 0) {
-        this.$store.dispatch('common/loginByUserName', { ...this.userLogin, func: () => { this.$router.push('/home'); } });
+        this.$store.dispatch('common/loginByUserName', { ...this.userLogin, func: () => { this.$router.push('/home'); } })
+          .then(res=>{
+            if(res){
+              localStorage.setItem("userId", res.userId);
+              localStorage.setItem("userName", res.userName);
+              localStorage.setItem("role", res.role);
+              if(res.role===3){
+                post('/supplier/isSupplierIn',{...res})
+                  .then(res=>{
+                    if(res===0){
+                      this.$router.push('/supplierInf');
+                    }else{
+                      this.$router.push('/home');
+                    }
+                  })
+                  .catch(e=>{console.log(e)})
+              }else{
+                this.$router.push('/home');
+              }
+            }
+          })
       } else if (this.tabIndex === 1) {
         if (this.phoneValidator(this.phoneLogin.phone)
           && this.codeValidator(this.phoneLogin.code)) {
-          this.$store.dispatch('common/loginByPhone', { ...this.phoneLogin.phone, func: () => { this.$router.push('/home'); } });
+          post("/user/phoneLogin",{
+            password:this.phoneLogin.code,
+            phone:this.phoneLogin.phone
+          }).then(res=>{
+           if(res.userId!==null){
+             localStorage.setItem("userId", res.userId);
+             localStorage.setItem("userName", res.userName);
+             localStorage.setItem("role", res.role);
+             if(res.role===3){
+               post('/supplier/isSupplierIn',{...res})
+                 .then(res=>{
+                   if(res===0){
+                     this.$router.push('/supplierInf');
+                   }else{
+                     this.$router.push('/home');
+                   }
+                 })
+                 .catch(e=>{console.log(e)})
+             }else{
+               this.$router.push('/home');
+             }
+           }
+          })
         }
       }
     },
     requireCode() {
+
       this.$refs.phoneForm.validate('phone')
-        .then(() => { this.$store.dispatch('common/getCode', { ...this.phoneLogin }); })
+        .then(() => {
+          post("/user/loginByPhone",{phone:this.phoneLogin.phone})
+            .then(res=>{
+              console.log(res)
+            })
+          this.isDis = true;
+          let time = 60
+          this.requireCodeMsg = time+'秒后重试'
+          let si = setInterval(()=>{
+            time--
+            this.requireCodeMsg = time+'秒后重试'
+          },1000)
+          setTimeout(()=>{
+            this.isDis = false;
+            clearInterval(si)
+            this.requireCodeMsg='发送验证码'
+          },60000)
+
+        })
         .catch((err) => { console.log(err); });
     },
     phoneValidator(val) {

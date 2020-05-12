@@ -1,7 +1,8 @@
+/* eslint-disable */
 import axios from 'axios';
 
 const service = axios.create({
-  baseURL: 'http://localhost', // url = base url + request url
+  baseURL: 'http://localhost:80', // url = base url + request url
   withCredentials: false, // send cookies when cross-domain requests
   timeout: 5000, // request timeout
 });

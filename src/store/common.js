@@ -1,11 +1,15 @@
+/* eslint-disable */
 // 各个角色通用的代码
-// import { post } from '../util/http';
+// import { post ,get} from '../util/http';
+
 import { Toast } from 'vant';
-import { post } from '../util/http';
+import { post ,get} from '../util/http';
 
 const common = {
   namespaced: true,
   state: {
+    userId:null,
+    role:null,
   },
   mutations: {
     ToastShow(state, msg) {
@@ -16,16 +20,15 @@ const common = {
     },
   },
   actions: {
+    dateToString(){
+      let date = new Date();
+      return date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()
+    },
     loginByUserName(context, params) {
       context.commit('ToastShow', '登录中');
-      post('/user/userLogin', {
+      return post('/user/login', {
         ...params,
-      })
-        .then((res) => {
-          console.log(res, params);
-          params.func();
-        })
-        .catch((err) => {
+      }).catch((err) => {
           console.log(err);
         });
     },

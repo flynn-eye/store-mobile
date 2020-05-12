@@ -1,10 +1,4 @@
 const Mock = require('mockjs');
-
-function userNamelogin() {
-  return {
-    userId: '1', name: 'zy', rule: 1, phone: '17351282003',
-  };
-}
 function getCode() {
   return {
     code: '124561',
@@ -66,8 +60,7 @@ function getTreeItems() {
     ],
   };
 }
-Mock.mock('http://localhost/user/userLogin', 'post', userNamelogin());
-Mock.mock('http://localhost/user/phoneLogin', 'post', userNamelogin());
+
 Mock.mock('http://localhost/user/getCode', 'post', getCode());
 Mock.mock('http://localhost/user/changePasswordByUsername', 'post', changePassword());
 Mock.mock('http://localhost/windowCustoms/getFirstClass', 'post', getFirstClass());

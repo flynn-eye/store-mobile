@@ -25,6 +25,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import _ from 'lodash';
 import {
   TreeSelect,
@@ -33,9 +34,11 @@ import {
   ActionSheet,
   Button,
   Toast,
+  Notify ,
 } from 'vant';
 import NavigationLayout from '../components/layout/NavigationLayout.vue';
 import XCell from '../components/XCell.vue';
+import { post ,get} from '../util/http';
 
 export default {
   name: 'WindowCustoms',
@@ -47,6 +50,7 @@ export default {
     ActionSheet,
     XCell,
     Button,
+    Notify ,
   },
   computed: {
     firstClass() {
@@ -57,24 +61,128 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch('windowCustomer/getFirstClass');
-    this.$store.dispatch('windowCustomer/getTreeItems');
+    this.$store.dispatch('windowCustomer/getFirstClass')
+      .then((res) => {
+        let result = []
+        for (let x of res.foodClasses) {
+          result.push({
+            text: x.className,
+            value: x.classId
+          })
+        }
+        this.firstClassValue = result[0].value
+        this.$store.state.windowCustomer.firstClass = result;
+        this.$store.dispatch('windowCustomer/getTreeItems', {classId:this.$store.state.windowCustomer.firstClass[0].value})
+          .then((res) => {
+            let result = []
+            for(let x of res.foodClasses){
+              this.$store.dispatch('windowCustomer/getFoodItemByTreeItem',{classId:x.classId})
+                .then(res=>{
+                  result.push({
+                    text:x.className,
+                    value:x.classId,
+                    children:res.map(item=>{return {id:item.itemId,text:item.itemName}})
+                  })
+                })
+            }
+            this.$store.state.windowCustomer.items = result
+          })
+        }
+      )
+  },
+  destroyed(){
+    this.$store.state.windowCustomer.flag = 0;
   },
   methods: {
     submitOrder() {
-      this.activeId = [];
-      this.sheetItems = [];
-      this.show = false;
-      Toast.success('提交中');
-      console.log(this.sheetItems);
+      if(this.$store.state.windowCustomer.flag==1){
+        let itemData = this.sheetItems.filter(
+          item=>{
+            return item.count>0
+          })
+        itemData = itemData.map(
+          item=>{
+            if(item.count>0)
+              return {itemId:item.id,count:item.count,itemName:item.text}
+          })
+        console.log(itemData)
+        let date = new Date();
+        let time= date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()
+        post('/require/updateItemInf',{
+          itemInf:JSON.stringify(itemData),
+          createTime:time,
+          userId:localStorage.getItem("userId")})
+          .then(res=>{
+            if(res===1){
+              Notify({
+                message: '报单成功',
+                duration: 1000,
+              });
+            }else{
+              Notify({
+                message: '报单失败',
+                duration: 1000,
+              });
+            }
+          })
+      }
+      if(this.$store.state.windowCustomer.flag==0){
+        let itemData = this.sheetItems.filter(
+          item=>{
+            return item.count>0
+          })
+        itemData = itemData.map(
+          item=>{
+            if(item.count>0)
+              return {itemId:item.id,count:item.count,itemName:item.text}
+          })
+        let time;
+        this.$store.dispatch('common/dateToString').then(res=>{
+          time = res
+          this.$store.dispatch('windowCustomer/addRequire', {
+            itemInf:JSON.stringify(itemData),
+            createTime:time,
+            userId:localStorage.getItem("userId")})
+            .then(res=>{
+              if(res===1){
+                Notify({
+                  message: '报单成功',
+                  duration: 1000,
+                });
+              }else{
+                Notify({
+                  message: '报单失败',
+                  duration: 1000,
+                });
+              }
+            });
+        })
+        this.activeId = [];
+        this.sheetItems = [];
+        this.show = false;
+      }
+
     },
     changeCounter(index, data) {
       this.sheetItems[index].count = data;
-      console.log(this.sheetItems);
     },
     onChange(value) {
       this.$store.commit('windowCustomer/setFirstClassValue', value);
-      this.$store.dispatch('windowCustomer/getTreeItems');
+       this.$store.dispatch('windowCustomer/getTreeItems',{classId:value})
+         .then((res) => {
+           let result = []
+           for(let x of res.foodClasses){
+             this.$store.dispatch('windowCustomer/getFoodItemByTreeItem',{classId:x.classId})
+               .then(res=>{
+                 result.push({
+                   text:x.className,
+                   value:x.classId,
+                   children:res.map(item=>{return {id:item.itemId,text:item.itemName}})
+                 })
+               })
+           }
+           this.$store.state.windowCustomer.items = result
+         })
     },
     open() {
       this.show = true;
@@ -92,7 +200,7 @@ export default {
     return {
       show: false,
       sheetItems: this.$store.state.windowCustomer.sheetItems,
-      firstClassValue: '13023',
+      firstClassValue:this.$store.state.windowCustomer.firstClassValue ,
       leftActiveIndex: this.$store.state.windowCustomer.leftActiveIndex,
       activeId: this.$store.state.windowCustomer.activeId,
     };

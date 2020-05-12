@@ -1,8 +1,10 @@
-import { post } from '../util/http';
+/* eslint-disable */
+import { post ,get} from '../util/http';
 
 const windowCustomer = {
   namespaced: true,
   state: {
+    flag:0,
     firstClass: [],
     firstClassValue: '',
     items: [],
@@ -23,15 +25,21 @@ const windowCustomer = {
   },
   actions: {
     getFirstClass(context) {
-      post('/windowCustoms/getFirstClass')
-        .then((res) => { context.commit('setFirstClass', res.firstClass); })
+      return get('/foodClass/getParentClass') //获取第一大类
         .catch((err) => { console.log(err); });
     },
-    getTreeItems(context) {
-      post('/windowCustoms/getTreeItems', context.state.firstClassValue)
-        .then((res) => { context.commit('setItems', res.items); })
+    getTreeItems(context,params) {
+      return get('/foodClass/getChildClass', {...params})
         .catch((err) => { console.log(err); });
     },
+    getFoodItemByTreeItem(context,params){
+      return get('/foodClass/getItem', {...params})
+        .catch((err) => { console.log(err); });
+    },
+    addRequire(context,params){
+      return post('/require/addRequire',{...params})
+        .catch((err) => { console.log(err); });
+    }
   },
 };
 export default windowCustomer;

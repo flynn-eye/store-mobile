@@ -1,14 +1,5 @@
 <template>
     <div>
-      <Steps v-if="step"
-             :active="active"
-             active-icon="success">
-        <template v-for="(i,k) in stepItem">
-          <Step :key="k">
-            {{i}}
-          </Step>
-        </template>
-      </Steps>
       <Collapse accordion v-model="open">
         <div v-for="(item,key) in items" :key="key">
           <CollapseItem :name="key">
@@ -33,23 +24,16 @@
           </CollapseItem>
         </div>
       </Collapse>
-      <Pagination
-        :mode="mode"
-        v-if="!step"
-        v-model="current"
-        :page-count="num"/>
     </div>
 </template>
 
 <script>
+/* eslint-disable */
 import {
   Collapse,
   CollapseItem,
-  Pagination,
   Cell,
   CellGroup,
-  Step,
-  Steps,
 } from 'vant';
 
 export default {
@@ -57,16 +41,12 @@ export default {
   components: {
     Collapse,
     CollapseItem,
-    Pagination,
     Cell,
     CellGroup,
-    Step,
-    Steps,
   },
   data() {
     return {
       open: ['1'],
-      current: this.currentPage,
       num: this.pageNum,
     };
   },
@@ -75,26 +55,13 @@ export default {
       type: String,
       default: 'custom', // supplier
     },
-    stepItem: {
-      type: Array,
-      default: () => [],
-    },
-    active: {},
-    step: {
-      type: Boolean,
-      default: false,
-    },
     items: {
       type: Array,
       default: () => [],
     },
-    pageNum: { // 总页数
+    pageNum: {
       type: Number,
       default: 6,
-    },
-    currentPage: { // 当前页数
-      type: Number,
-      default: 1,
     },
     mode: {
       type: String,
@@ -108,9 +75,7 @@ export default {
   methods: {
   },
   watch: {
-    current(oldVal, newVal) {
-      this.$emit('updateItem', newVal);
-    },
+
   },
 };
 </script>
